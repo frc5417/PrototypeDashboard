@@ -13,9 +13,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SuperDrive extends SubsystemBase {
 
-  final int CANLIM = 4;
-  final int TALLIM = 4;
-  final int VICLIM = 6;
+  final int CANLIM = 10;
+  final int TALLIM = 20;
+  final int VICLIM = 30;
   private CANSparkMax can;
   private WPI_TalonSRX talon;
   private WPI_VictorSPX victor;
