@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.MotorPID;
 import frc.robot.commands.RunMotor;
 import frc.robot.subsystems.SuperDrive;
 
@@ -28,6 +29,8 @@ public class Robot extends TimedRobot {
   private int nMotors = 0;
   private int ports[];
   private RunMotor runs[];
+  private MotorPID pids[];
+  private SuperDrive sd[];
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -44,6 +47,7 @@ public class Robot extends TimedRobot {
     .withSize(3, 3)
     .getEntry();
     SmartDashboard.getNumber("Number of Motors: ", 0.0);
+    SmartDashboard.putString("Click The Box", "The Box");
   }
 
   /**
@@ -114,21 +118,35 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     if(nMotors == 0){
       nMotors = updSet("Number of Motors: ");
-      System.out.println(nMotors);
+      //System.out.println(nMotors);
       if(nMotors > 0){
         SmartDashboard.delete("Number of Motors: ");
         ports = new int[nMotors];
         runs = new RunMotor[nMotors];
+        pids = new MotorPID[nMotors];
+        sd = new SuperDrive[nMotors];
       }
     }else{
       for(int i = 0; i < nMotors; i++){
         if(ports[i] > 0){
           runs[i].setSpeed(updSetd("Speed for Motor #" + i + ":"));
-          runs[i].schedule();
+          pids[i].setPID(
+            updSetd("kP for Motor #" + i + ":"),
+            updSetd("kI for Motor #" + i + ":"),
+            updSetd("kD for Motor #" + i + ":")
+          );
+          pids[i].setSetPoint(updSetd("Set Point for Motor #" + i + ":"));
+          if(runs[i].getSpeed() > 0){
+            runs[i].schedule();
+          }else{
+            pids[i].schedule();
+          }
         }else{
           ports[i] = updSet("Port for Motor #" + i + ":");
           if(ports[i] > 0){
-            runs[i] = new RunMotor(new SuperDrive(ports[i], i));
+            sd[i] = new SuperDrive(ports[i]);
+            runs[i] = new RunMotor(sd[i]);
+            pids[i] = new MotorPID(sd[i]);
             SmartDashboard.delete("Port for Motor #" + i + ":");
           }
         }
