@@ -5,6 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -35,9 +38,12 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+    ShuffleboardTab tab = Shuffleboard.getTab("SmartDashboard");
+    tab.add("Instructions", "To use CANSPARKMAX motors, use ports 1-10. To use TALON motors, use ports 11-20. To use VICTOR motors, use ports 21-30.")
+    .withWidget(BuiltInWidgets.kTextView)
+    .withSize(3, 3)
+    .getEntry();
     SmartDashboard.getNumber("Number of Motors: ", 0.0);
-
-
   }
 
   /**
@@ -60,6 +66,12 @@ public class Robot extends TimedRobot {
 
   private int updSet(String key){
     int ret = (int)SmartDashboard.getNumber(key, 0.0);
+    SmartDashboard.putNumber(key, ret);
+    return ret;
+  }
+
+  private double updSetd(String key){
+    double ret = SmartDashboard.getNumber(key, 0.0);
     SmartDashboard.putNumber(key, ret);
     return ret;
   }
@@ -111,7 +123,7 @@ public class Robot extends TimedRobot {
     }else{
       for(int i = 0; i < nMotors; i++){
         if(ports[i] > 0){
-          runs[i].setSpeed(updSet("Speed for Motor #" + i + ":"));
+          runs[i].setSpeed(updSetd("Speed for Motor #" + i + ":"));
           runs[i].schedule();
         }else{
           ports[i] = updSet("Port for Motor #" + i + ":");

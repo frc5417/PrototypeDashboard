@@ -34,7 +34,7 @@ public class SuperDrive extends SubsystemBase {
     }
   }
 
-  public void setPower(int speed){
+  public void setPower(double speed){
     if(type == 1){
       can.set(speed);
     }

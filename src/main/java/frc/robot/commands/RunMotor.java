@@ -11,7 +11,7 @@ public class RunMotor extends CommandBase {
   /** Creates a new RunMotor. */
 
   private SuperDrive sd;
-  private int speed;
+  private double speed;
 
   public RunMotor(SuperDrive sd) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -20,11 +20,11 @@ public class RunMotor extends CommandBase {
     addRequirements(sd);
   }
 
-  public void setSpeed(int speed){
+  public void setSpeed(double speed){
     this.speed = speed;
   }
 
-  public int getSpeed(){
+  public double getSpeed(){
     return speed;
   }
 
