@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import java.util.Map;
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -26,6 +30,7 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
 
   private int nMotors = 0;
+  private NetworkTableEntry nMotorsEntry;
   private int ports[];
   private RunMotor runs[];
 
@@ -33,17 +38,23 @@ public class Robot extends TimedRobot {
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
+
+  ShuffleboardTab tab = Shuffleboard.getTab("Prototype Dashboard");
+
   @Override
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    ShuffleboardTab tab = Shuffleboard.getTab("SmartDashboard");
     tab.add("Instructions", "To use CANSPARKMAX motors, use ports 1-10. To use TALON motors, use ports 11-20. To use VICTOR motors, use ports 21-30.")
     .withWidget(BuiltInWidgets.kTextView)
-    .withSize(3, 3)
+    .withSize(1, 6)
     .getEntry();
-    SmartDashboard.getNumber("Number of Motors: ", 0.0);
+    nMotorsEntry = tab.add("Number of Motors: ", 0)
+    .withWidget(BuiltInWidgets.kNumberSlider)
+    .withProperties(Map.of("min",0,"max",32,"step",1))
+    .getEntry();
+    // SmartDashboard.getNumber("Number of Motors: ", 0.0);
   }
 
   /**
@@ -112,6 +123,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    nMotorsEntry.getDouble(0);
     if(nMotors == 0){
       nMotors = updSet("Number of Motors: ");
       System.out.println(nMotors);
