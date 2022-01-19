@@ -32,7 +32,6 @@ public class Robot extends TimedRobot {
   private RunMotor runs[];
   private MotorPID pids[];
   private SuperDrive sd[];
-  
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -45,6 +44,7 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+    ShuffleboardTab tab = Shuffleboard.getTab("Instructions");
     tab.add("Instructions", "To use CANSPARKMAX motors, use ports 1-10. To use TALON motors, use ports 11-20. To use VICTOR motors, use ports 21-30.")
     .withWidget(BuiltInWidgets.kTextView)
     .withSize(1, 6)
@@ -53,9 +53,8 @@ public class Robot extends TimedRobot {
     .withWidget(BuiltInWidgets.kNumberSlider)
     .withProperties(Map.of("min",0,"max",32,"step",1))
     .getEntry();
-
+    SmartDashboard.getNumber("Number of Motors: ", 0.0);
     SmartDashboard.putString("Click The Box", "The Box");
-    // SmartDashboard.getNumber("Number of Motors: ", 0.0);
   }
 
   /**
@@ -127,11 +126,13 @@ public class Robot extends TimedRobot {
     nMotorsEntry.getDouble(0);
     if(nMotors == 0){
       nMotors = updSet("Number of Motors: ");
-      // System.out.println(nMotors);
+      //System.out.println(nMotors);
       if(nMotors > 0){
         SmartDashboard.delete("Number of Motors: ");
         ports = new int[nMotors];
         runs = new RunMotor[nMotors];
+        pids = new MotorPID[nMotors];
+        sd = new SuperDrive[nMotors];
       }
     }else{
       for(int i = 0; i < nMotors; i++){
@@ -143,7 +144,8 @@ public class Robot extends TimedRobot {
             updSetd("kD for Motor #" + i + ":")
           );
           pids[i].setSetPoint(updSetd("Set Point for Motor #" + i + ":"));
-          if(runs[i].getSpeed() > 0){
+          SmartDashboard.putNumber("Velocity for Motor #" + i + ":", sd[i].getVelocity());
+          if(Math.abs(runs[i].getSpeed()) > 0.000000001){
             runs[i].schedule();
           }else{
             pids[i].schedule();
