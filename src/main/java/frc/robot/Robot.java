@@ -41,7 +41,7 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    ShuffleboardTab tab = Shuffleboard.getTab("SmartDashboard");
+    ShuffleboardTab tab = Shuffleboard.getTab("Instructions");
     tab.add("Instructions", "To use CANSPARKMAX motors, use ports 1-10. To use TALON motors, use ports 11-20. To use VICTOR motors, use ports 21-30.")
     .withWidget(BuiltInWidgets.kTextView)
     .withSize(3, 3)
