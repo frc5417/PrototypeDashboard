@@ -136,7 +136,8 @@ public class Robot extends TimedRobot {
             updSetd("kD for Motor #" + i + ":")
           );
           pids[i].setSetPoint(updSetd("Set Point for Motor #" + i + ":"));
-          if(runs[i].getSpeed() > 0){
+          SmartDashboard.putNumber("Velocity for Motor #" + i + ":", sd[i].getVelocity());
+          if(Math.abs(runs[i].getSpeed()) > 0.000000001){
             runs[i].schedule();
           }else{
             pids[i].schedule();

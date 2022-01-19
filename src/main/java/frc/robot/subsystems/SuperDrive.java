@@ -59,6 +59,14 @@ public class SuperDrive extends SubsystemBase {
     }
   }
 
+  public double getVelocity(){
+    if(type == 1){
+      return can.getEncoder().getVelocity();
+    }else{
+      return 0.0;
+    }
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
