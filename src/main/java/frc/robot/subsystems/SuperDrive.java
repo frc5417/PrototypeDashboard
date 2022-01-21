@@ -10,38 +10,43 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 
 public class SuperDrive extends SubsystemBase {
 
   private CANSparkMax can;
   private WPI_TalonSRX talon;
   private WPI_VictorSPX victor;
+  private Solenoid solenoid;
   private int type = 0;
 
-  public SuperDrive(int port) {
-    if(port <= Constants.CANLIM){
+  public SuperDrive(int port, int type) {
+    this.type = type;
+    if(type == 1){
       can = new CANSparkMax(port, MotorType.kBrushless);
       type = 1;
-    }else if(port <= Constants.TALLIM){
+    }else if(type == 2){
       talon = new WPI_TalonSRX(port);
       type = 2;
-    }else if(port <= Constants.VICLIM){
+    }else if(type == 3){
       victor = new WPI_VictorSPX(port);
       type = 3;
+    }else if(type == 4){
+      solenoid = new Solenoid(PneumaticsModuleType.CTREPCM, port);
     }
   }
 
   public void setPower(double speed){
     if(type == 1){
       can.set(speed);
-    }
-    if(type == 2){
+    }else if(type == 2){
       talon.set(speed);
-    }
-    if(type == 3){
+    }else if(type == 3){
       victor.set(speed);
+    }else if(type == 4){
+      solenoid.set(speed > 0.0000001);
     }
   }
 

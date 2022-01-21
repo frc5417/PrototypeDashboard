@@ -28,6 +28,7 @@ public class Robot extends TimedRobot {
   private RunMotor runs[];
   private MotorPID pids[];
   private SuperDrive sd[];
+  private int type[];
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -39,9 +40,9 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
     ShuffleboardTab tab = Shuffleboard.getTab("Instructions");
-    tab.add("Instructions", "To use CANSPARKMAX motors, use ports 1-10. To use TALON motors, use ports 11-20. To use VICTOR motors, use ports 21-30.")
+    tab.add("Instructions", "To use CANSPARKMAX motors, use type=1. To use TALON motors, use type=2. To use VICTOR motors, use type=3. To use solenoids, use type=4")
     .withWidget(BuiltInWidgets.kTextView)
-    .withSize(3, 3)
+    .withSize(1, 6)
     .getEntry();
     SmartDashboard.getNumber("Number of Motors: ", 0.0);
     SmartDashboard.putString("Click The Box", "The Box");
@@ -113,19 +114,30 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    if(nMotors == 0){
+    if(nMotors == 0){ // Select motors!!
       nMotors = updSet("Number of Motors: ");
       //System.out.println(nMotors);
-      if(nMotors > 0){
+      if(nMotors > 0){ // initialize the motors and arrays and things that store info!!!!
         SmartDashboard.delete("Number of Motors: ");
         ports = new int[nMotors];
         runs = new RunMotor[nMotors];
         pids = new MotorPID[nMotors];
         sd = new SuperDrive[nMotors];
+        type = new int[nMotors];
       }
     }else{
       for(int i = 0; i < nMotors; i++){
-        if(ports[i] > 0){
+        if(type[i] == 0){
+          ports[i] = updSet("Port for Motor #" + i + ":");
+          type[i] = updSet("Type of Motor #" + i + ":");
+          if(type[i] > 0){ // actually initialize the motors with ports and types
+            sd[i] = new SuperDrive(ports[i], type[i]);
+            runs[i] = new RunMotor(sd[i]);
+            pids[i] = new MotorPID(sd[i]);
+            SmartDashboard.delete("Port for Motor #" + i + ":");
+            SmartDashboard.delete("Type of Motor #" + i + ":");
+          }
+        }else if(type[i] == 1){ // set speeds and PID for CANSPARKMAXes
           runs[i].setSpeed(updSetd("Speed for Motor #" + i + ":"));
           pids[i].setPID(
             updSetd("kP for Motor #" + i + ":"),
@@ -139,14 +151,12 @@ public class Robot extends TimedRobot {
           }else{
             pids[i].schedule();
           }
-        }else{
-          ports[i] = updSet("Port for Motor #" + i + ":");
-          if(ports[i] > 0){
-            sd[i] = new SuperDrive(ports[i]);
-            runs[i] = new RunMotor(sd[i]);
-            pids[i] = new MotorPID(sd[i]);
-            SmartDashboard.delete("Port for Motor #" + i + ":");
-          }
+        }else if(type[i] == 4){ // do things with solenoid
+          runs[i].setSpeed(updSet("Solenoid #" + i + " on or off?"));
+          runs[i].schedule();
+        }else{ // set speeds for other motors
+          runs[i].setSpeed(updSetd("Speed for Motor #" + i + ":"));
+          runs[i].schedule();
         }
       }
     }
