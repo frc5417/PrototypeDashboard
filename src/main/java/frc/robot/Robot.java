@@ -4,10 +4,6 @@
 
 package frc.robot;
 
-import java.util.Map;
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -27,16 +23,12 @@ public class Robot extends TimedRobot {
   private RobotContainer m_robotContainer;
 
   private int nMotors = 0;
-  private NetworkTableEntry nMotorsEntry;
   private int ports[];
   private RunMotor runs[];
   private MotorPID pids[];
   private SuperDrive sd[];
-<<<<<<< HEAD
   private int type[];
 
-=======
->>>>>>> master
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -53,13 +45,6 @@ public class Robot extends TimedRobot {
     tab.add("Instructions", "To use CANSPARKMAX motors, use type=1. To use TALON motors, use type=2. To use VICTOR motors, use type=3. To use solenoids, use type=4")
     .withWidget(BuiltInWidgets.kTextView)
     .withSize(1, 6)
-<<<<<<< HEAD
-=======
-    .getEntry();
-    nMotorsEntry = tab.add("Number of Motors: ", 0)
-    .withWidget(BuiltInWidgets.kNumberSlider)
-    .withProperties(Map.of("min",0,"max",32,"step",1))
->>>>>>> master
     .getEntry();
     SmartDashboard.getNumber("Number of Motors: ", 0.0);
     SmartDashboard.putString("Click The Box", "The Box");
@@ -131,14 +116,8 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-<<<<<<< HEAD
     if(nMotors == 0){ // Select motors!!
       nMotors = updSet("Number of Motors:");
-=======
-    nMotorsEntry.getDouble(0);
-    if(nMotors == 0){
-      nMotors = updSet("Number of Motors: ");
->>>>>>> master
       //System.out.println(nMotors);
       if(nMotors > 0){ // initialize the motors and arrays and things that store info!!!!
         SmartDashboard.delete("Number of Motors:");
