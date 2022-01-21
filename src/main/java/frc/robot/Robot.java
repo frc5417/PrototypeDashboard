@@ -115,10 +115,10 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if(nMotors == 0){ // Select motors!!
-      nMotors = updSet("Number of Motors: ");
+      nMotors = updSet("Number of Motors:");
       //System.out.println(nMotors);
       if(nMotors > 0){ // initialize the motors and arrays and things that store info!!!!
-        SmartDashboard.delete("Number of Motors: ");
+        SmartDashboard.delete("Number of Motors:");
         ports = new int[nMotors];
         runs = new RunMotor[nMotors];
         pids = new MotorPID[nMotors];
