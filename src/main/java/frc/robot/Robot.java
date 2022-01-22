@@ -68,6 +68,12 @@ public class Robot extends TimedRobot {
     
   }
 
+  private String updSetStr(String key){
+    String ret = SmartDashboard.getString(key, "");
+    SmartDashboard.putString(key, ret);
+    return ret;
+  }
+
   private int updSet(String key){
     int ret = (int)SmartDashboard.getNumber(key, 0.0);
     SmartDashboard.putNumber(key, ret);
@@ -117,8 +123,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if(nMotors == 0){ // Select motors!!
-      nMotors = updSet("Number of Motors:");
-      //System.out.println(nMotors);
+      updSet("Number of Motors:");
+      if(!updSetStr("Click The Box").equalsIgnoreCase("Change Me!")){
+        nMotors = updSet("Number of Motors:");
       if(nMotors > 0){ // initialize the motors and arrays and things that store info!!!!
         SmartDashboard.delete("Number of Motors:");
         ports = new int[nMotors];
@@ -127,6 +134,7 @@ public class Robot extends TimedRobot {
         sd = new SuperDrive[nMotors];
         type = new int[nMotors];
       }
+    }
     }else{
       for(int i = 0; i < nMotors; i++){
         if(type[i] == 0){
@@ -139,6 +147,7 @@ public class Robot extends TimedRobot {
             SmartDashboard.delete("Port for Motor #" + i + ":");
             SmartDashboard.delete("Type of Motor #" + i + ":");
           }
+        
         }else if(type[i] == 1){ // set speeds and PID for CANSPARKMAXes
           runs[i].setSpeed(updSetd("Speed for Motor #" + i + ":"));
           pids[i].setPID(
