@@ -17,6 +17,7 @@ import frc.robot.subsystems.*;
  * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
+// Shuffleboard
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
@@ -40,6 +41,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
+    
     m_robotContainer = new RobotContainer();
     ShuffleboardTab tab = Shuffleboard.getTab("Instructions");
     tab.add("Instructions", "To use CANSPARKMAX motors, use type=1. To use TALON motors, use type=2. To use VICTOR motors, use type=3. To use solenoids, use type=4")
@@ -47,7 +49,7 @@ public class Robot extends TimedRobot {
     .withSize(1, 6)
     .getEntry();
     SmartDashboard.getNumber("Number of Motors: ", 0.0);
-    SmartDashboard.putString("Click The Box", "The Box");
+    SmartDashboard.putBoolean("Toggle", false);
   }
 
   /**
@@ -77,6 +79,12 @@ public class Robot extends TimedRobot {
   private int updSet(String key){
     int ret = (int)SmartDashboard.getNumber(key, 0.0);
     SmartDashboard.putNumber(key, ret);
+    return ret;
+  }
+
+  private Boolean updSetBool(String key){
+    boolean ret = SmartDashboard.getBoolean(key, false);
+    SmartDashboard.putBoolean(key, ret);
     return ret;
   }
 
@@ -124,7 +132,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     if(nMotors == 0){ // Select motors!!
       updSet("Number of Motors:");
-      if(!updSetStr("Click The Box").equalsIgnoreCase("Change Me!")){
+      if(updSetBool("Toggle")){
         nMotors = updSet("Number of Motors:");
       if(nMotors > 0){ // initialize the motors and arrays and things that store info!!!!
         SmartDashboard.delete("Number of Motors:");
