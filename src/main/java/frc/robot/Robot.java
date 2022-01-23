@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,18 +21,10 @@ import frc.robot.subsystems.*;
  * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
-// Shuffleboard
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
-
-  private int nMotors = 0;
-  private int ports[];
-  private RunMotor runs[];
-  private MotorPID pids[];
-  private SuperDrive sd[];
-  private int type[];
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -36,20 +32,40 @@ public class Robot extends TimedRobot {
    */
 
   ShuffleboardTab tab = Shuffleboard.getTab("Prototype Dashboard");
+  NetworkTableInstance inst = NetworkTableInstance.getDefault();
+
+  private NetworkTableEntry nMotorsEntry;
+  private int nMotors = 0;
+  private NetworkTableEntry toggleBtn;
+  private NetworkTableEntry ports[];
+  private NetworkTableEntry type[];
+
+  private NetworkTableEntry speeds[];
+  private NetworkTableEntry kP[];
+  private NetworkTableEntry kI[];
+  private NetworkTableEntry kD[];
+  private NetworkTableEntry velocity[];
+  private NetworkTableEntry setPoint[];
+
+  private int types[];
+  private RunMotor runs[];
+  private MotorPID pids[];
+  private SuperDrive sd[];
 
   @Override
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     
-    m_robotContainer = new RobotContainer();
-    ShuffleboardTab tab = Shuffleboard.getTab("Instructions");
-    tab.add("Instructions", "To use CANSPARKMAX motors, use type=1. To use TALON motors, use type=2. To use VICTOR motors, use type=3. To use solenoids, use type=4")
+    tab.add("How to Use", "To use CANSPARKMAX motors, use type=1. To use TALON motors, use type=2. To use VICTOR motors, use type=3. To use solenoids, use type=4")
     .withWidget(BuiltInWidgets.kTextView)
     .withSize(1, 6)
     .getEntry();
-    SmartDashboard.getNumber("Number of Motors: ", 0.0);
-    SmartDashboard.putBoolean("Toggle", false);
+
+    nMotorsEntry = tab.add("Number of Motors: ", 0).getEntry();
+    
+    toggleBtn = tab.add("Toggle", false).withWidget(BuiltInWidgets.kToggleButton).getEntry();
+
   }
 
   /**
@@ -70,27 +86,18 @@ public class Robot extends TimedRobot {
     
   }
 
-  private String updSetStr(String key){
-    String ret = SmartDashboard.getString(key, "");
-    SmartDashboard.putString(key, ret);
+  private int updSetInt(NetworkTableEntry entry){
+    int ret = entry.getNumber(0).intValue();
     return ret;
   }
 
-  private int updSet(String key){
-    int ret = (int)SmartDashboard.getNumber(key, 0.0);
-    SmartDashboard.putNumber(key, ret);
+  private Boolean updSetBool(NetworkTableEntry entry){
+    boolean ret = entry.getBoolean(false);
     return ret;
   }
 
-  private Boolean updSetBool(String key){
-    boolean ret = SmartDashboard.getBoolean(key, false);
-    SmartDashboard.putBoolean(key, ret);
-    return ret;
-  }
-
-  private double updSetd(String key){
-    double ret = SmartDashboard.getNumber(key, 0.0);
-    SmartDashboard.putNumber(key, ret);
+  private double updSetDouble(NetworkTableEntry entry){
+    double ret = (double)entry.getNumber(0.0);
     return ret;
   }
 
@@ -122,59 +129,87 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
+    m_robotContainer = new RobotContainer();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    NetworkTable table = inst.getTable("/Shuffleboard/Prototype Dashboard");
+    for (String key : table.getKeys()) {
+      System.out.println("Key: " + key);
+      table.getEntry(key).delete();
+    }
+    
+    table.getEntry("How To Use");
+    nMotorsEntry.setNumber(0);
+    toggleBtn.setBoolean(false);
   }
 
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
     if(nMotors == 0){ // Select motors!!
-      updSet("Number of Motors:");
-      if(updSetBool("Toggle")){
-        nMotors = updSet("Number of Motors:");
-      if(nMotors > 0){ // initialize the motors and arrays and things that store info!!!!
-        SmartDashboard.delete("Number of Motors:");
-        ports = new int[nMotors];
-        runs = new RunMotor[nMotors];
-        pids = new MotorPID[nMotors];
-        sd = new SuperDrive[nMotors];
-        type = new int[nMotors];
+      if(updSetBool(toggleBtn)){
+        nMotors = updSetInt(nMotorsEntry);
+        if(nMotors > 0){ // initialize the motors and arrays and things that store info!!!!
+          ports = new NetworkTableEntry[nMotors];
+          runs = new RunMotor[nMotors];
+          pids = new MotorPID[nMotors];
+          sd = new SuperDrive[nMotors];
+          type = new NetworkTableEntry[nMotors];
+          types = new int[nMotors];
+          speeds = new NetworkTableEntry[nMotors];
+
+          kP = new NetworkTableEntry[nMotors];
+          kI = new NetworkTableEntry[nMotors];
+          kD = new NetworkTableEntry[nMotors];
+          velocity = new NetworkTableEntry[nMotors];
+          setPoint = new NetworkTableEntry[nMotors];
+
+          for(int i = 0; i < nMotors; i++){
+            ports[i] = tab.add("Port for Motor #" + i + ":", 0).getEntry();
+            type[i] = tab.add("Type of Motor #" + i + ":", 0).getEntry();
+          }
+        }
       }
-    }
     }else{
       for(int i = 0; i < nMotors; i++){
-        if(type[i] == 0){
-          ports[i] = updSet("Port for Motor #" + i + ":");
-          type[i] = updSet("Type of Motor #" + i + ":");
-          if(type[i] > 0){ // actually initialize the motors with ports and types
-            sd[i] = new SuperDrive(ports[i], type[i]);
+        if(types[i] == 0){
+          types[i] = updSetInt(type[i]);
+          if(types[i] > 0){ // actually initialize the motors with ports and types
+            sd[i] = new SuperDrive(updSetInt(ports[i]), types[i]);
             runs[i] = new RunMotor(sd[i]);
             pids[i] = new MotorPID(sd[i]);
-            SmartDashboard.delete("Port for Motor #" + i + ":");
-            SmartDashboard.delete("Type of Motor #" + i + ":");
+            if(types[i] == 4) {
+              speeds[i] = tab.add("Solenoid #" + i + " on or off?", false).withWidget(BuiltInWidgets.kToggleSwitch).getEntry();
+            } else {
+              speeds[i] = tab.add("Speed for Motor #" + i + ":", 0).getEntry();
+            }
+
+            if(types[i] == 1) {
+              kP[i] = tab.add("kP for Motor #" + i + ":", 0).getEntry();
+              kI[i] = tab.add("kI for Motor #" + i + ":", 0).getEntry();
+              kD[i] = tab.add("kD for Motor #" + i + ":", 0).getEntry();
+              velocity[i] = tab.add("Velocity for Motor #" + i + ":", 0).getEntry();
+              setPoint[i] = tab.add("Set Point for Motor #" + i + ":", 0).getEntry();
+            }
           }
         
-        }else if(type[i] == 1){ // set speeds and PID for CANSPARKMAXes
-          runs[i].setSpeed(updSetd("Speed for Motor #" + i + ":"));
+        }else if(types[i] == 1){ // set speeds and PID for CANSPARKMAXes
+          runs[i].setSpeed(updSetDouble(speeds[i]));
           pids[i].setPID(
-            updSetd("kP for Motor #" + i + ":"),
-            updSetd("kI for Motor #" + i + ":"),
-            updSetd("kD for Motor #" + i + ":")
+            updSetInt(kP[i]),
+            updSetInt(kI[i]),
+            updSetInt(kD[i])
           );
-          pids[i].setSetPoint(updSetd("Set Point for Motor #" + i + ":"));
-          SmartDashboard.putNumber("Velocity for Motor #" + i + ":", sd[i].getVelocity());
+          pids[i].setSetPoint(updSetDouble(setPoint[i]));
+          velocity[i].setNumber(sd[i].getVelocity());
           if(Math.abs(runs[i].getSpeed()) > 0.000000001){
             runs[i].schedule();
           }else{
             pids[i].schedule();
           }
-        }else if(type[i] == 4){ // do things with solenoid
-          runs[i].setSpeed(updSet("Solenoid #" + i + " on or off?"));
-          runs[i].schedule();
         }else{ // set speeds for other motors
-          runs[i].setSpeed(updSetd("Speed for Motor #" + i + ":"));
+          runs[i].setSpeed(updSetInt(speeds[i]));
           runs[i].schedule();
         }
       }
