@@ -54,9 +54,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-    // autonomous chooser on the dashboard.
-    
+
     tab.add("How to Use", "To use CANSPARKMAX motors, use type=1. To use TALON motors, use type=2. To use VICTOR motors, use type=3. To use solenoids, use type=4")
     .withWidget(BuiltInWidgets.kTextView)
     .withSize(1, 6)
@@ -65,7 +63,9 @@ public class Robot extends TimedRobot {
     nMotorsEntry = tab.add("Number of Motors: ", 0).getEntry();
     
     toggleBtn = tab.add("Toggle", false).withWidget(BuiltInWidgets.kToggleButton).getEntry();
-
+    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+    // autonomous chooser on the dashboard.
+  
   }
 
   /**
@@ -133,15 +133,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    NetworkTable table = inst.getTable("/Shuffleboard/Prototype Dashboard");
-    for (String key : table.getKeys()) {
-      System.out.println("Key: " + key);
-      table.getEntry(key).delete();
-    }
-    
-    table.getEntry("How To Use");
-    nMotorsEntry.setNumber(0);
-    toggleBtn.setBoolean(false);
+
+    //toggleBtn.setBoolean(false);
   }
 
   /** This function is called periodically during operator control. */
@@ -166,8 +159,9 @@ public class Robot extends TimedRobot {
           setPoint = new NetworkTableEntry[nMotors];
 
           for(int i = 0; i < nMotors; i++){
-            ports[i] = tab.add("Port for Motor #" + i + ":", 0).getEntry();
-            type[i] = tab.add("Type of Motor #" + i + ":", 0).getEntry();
+            ShuffleboardLayout layout = tab.getLayout("Motor #"+i);
+            ports[i] = layout.add("Port for Motor #" + i + ":", 0).getEntry();
+            type[i] = layout.add("Type of Motor #" + i + ":", 0).getEntry();
           }
         }
       }
@@ -175,22 +169,24 @@ public class Robot extends TimedRobot {
       for(int i = 0; i < nMotors; i++){
         if(types[i] == 0){
           types[i] = updSetInt(type[i]);
+          ShuffleboardLayout layout = tab.getLayout("Motor #"+i);
+
           if(types[i] > 0){ // actually initialize the motors with ports and types
             sd[i] = new SuperDrive(updSetInt(ports[i]), types[i]);
             runs[i] = new RunMotor(sd[i]);
             pids[i] = new MotorPID(sd[i]);
             if(types[i] == 4) {
-              speeds[i] = tab.add("Solenoid #" + i + " on or off?", false).withWidget(BuiltInWidgets.kToggleSwitch).getEntry();
+              speeds[i] = layout.add("Solenoid #" + i + " on or off?", false).withWidget(BuiltInWidgets.kToggleSwitch).getEntry();
             } else {
-              speeds[i] = tab.add("Speed for Motor #" + i + ":", 0).getEntry();
+              speeds[i] = layout.add("Speed for Motor #" + i + ":", 0).getEntry();
             }
 
             if(types[i] == 1) {
-              kP[i] = tab.add("kP for Motor #" + i + ":", 0).getEntry();
-              kI[i] = tab.add("kI for Motor #" + i + ":", 0).getEntry();
-              kD[i] = tab.add("kD for Motor #" + i + ":", 0).getEntry();
-              velocity[i] = tab.add("Velocity for Motor #" + i + ":", 0).getEntry();
-              setPoint[i] = tab.add("Set Point for Motor #" + i + ":", 0).getEntry();
+              kP[i] = layout.add("kP for Motor #" + i + ":", 0).getEntry();
+              kI[i] = layout.add("kI for Motor #" + i + ":", 0).getEntry();
+              kD[i] = layout.add("kD for Motor #" + i + ":", 0).getEntry();
+              velocity[i] = layout.add("Velocity for Motor #" + i + ":", 0).getEntry();
+              setPoint[i] = layout.add("Set Point for Motor #" + i + ":", 0).getEntry();
             }
           }
         
