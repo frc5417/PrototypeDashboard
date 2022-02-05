@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,6 +23,9 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
+
+  private NetworkTableInstance inst;
+  private NetworkTable table;
 
   private int nMotors = 0;
   private int ports[];
@@ -108,6 +113,8 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
+    inst = NetworkTableInstance.getDefault();
+    table = inst.getTable("SmartDashboard");
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
@@ -116,6 +123,15 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    if(SmartDashboard.getBoolean("reset", false)) {
+      for(int i = 0; i < nMotors; i++){
+        if(sd[i] != null)
+          sd[i].delete();
+      }
+      nMotors = 0;
+      table.getEntry("reset").setBoolean(false);
+
+    }
     if(nMotors == 0){ // Select motors!!
       nMotors = updSet("Number of Motors:");
       //System.out.println(nMotors);
