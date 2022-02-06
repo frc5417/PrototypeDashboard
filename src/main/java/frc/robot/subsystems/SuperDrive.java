@@ -72,6 +72,22 @@ public class SuperDrive extends SubsystemBase {
     }
   }
 
+  public void delete(){
+    if(can != null)
+      can.close();
+    can = null;
+    if(talon != null)
+      talon.DestroyObject();
+    talon = null;
+    if(victor != null)
+      victor.DestroyObject();
+    victor = null;
+    if(solenoid != null)
+      solenoid.close();
+    solenoid = null;
+    type = 0;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
